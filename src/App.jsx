@@ -3,7 +3,6 @@ import Swal from 'sweetalert2'
 import styled from 'styled-components'
 import './App.css'
 import Sheet from './Sheet'
-import { MdSwipeDown } from "react-icons/md";
 // import "./index.css"
 
 const seedTasks = []
