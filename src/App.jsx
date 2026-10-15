@@ -1,0 +1,420 @@
+import { useEffect, useMemo, useRef, useState } from 'react'
+import Swal from 'sweetalert2'
+import styled from 'styled-components'
+import './App.css'
+import Sheet from './Sheet'
+import { MdSwipeDown } from "react-icons/md";
+// import "./index.css"
+
+const seedTasks = []
+
+function App() {
+  const [open, setOpen] = useState(false)
+  const [tasks, setTasks] = useState(() => {
+    try {
+      const storedTasks = localStorage.getItem('s')
+      return storedTasks ? JSON.parse(storedTasks) : seedTasks
+    } catch (error) {
+      console.warn('Could not load tasks from localStorage.', error)
+      return seedTasks
+    }
+  })
+
+
+  const [newTask, setNewTask] = useState(() => {
+    try {
+      return localStorage.getItem('n') ?? ''
+    } catch (error) {
+      console.warn('Could not load input value from localStorage.', error)
+      return ''
+    }
+  })
+
+
+
+  const [filter, setFilter] = useState(() => {
+    try {
+      return localStorage.getItem('f') ?? 'all'
+    } catch (error) {
+      console.warn('Could not load filter value from localStorage.', error)
+      return 'all'
+    }
+  })
+
+
+  const filteredTasks = useMemo(() => {
+    if (filter === 'active') {
+      return tasks.filter((task) => !task.done)
+    }
+
+    if (filter === 'completed') {
+      return tasks.filter((task) => task.done)
+    }
+
+    return tasks
+  }, [filter, tasks])
+
+  const remainingTasks = tasks.filter((task) => !task.done).length
+  const completedTasks = tasks.length - remainingTasks
+
+  const ref = useRef()
+  const addTask = (event) => {
+    if (event.target.value == undefined) {
+      //  console.log( ref.current.value);
+      ref.current.focus()
+      ref.current.placeholder = 'Please write a task..'
+
+    }
+
+    event.preventDefault()
+
+    const trimmed = newTask.trim()
+    if (!trimmed) return
+
+    setTasks((currentTasks) => [
+      { id: Date.now() + Math.random(), text: trimmed, done: false },
+      ...currentTasks,
+    ])
+    setNewTask('')
+  }
+
+  const toggleTask = (id) => {
+    setTasks((currentTasks) =>
+      currentTasks.map((task) =>
+        task.id === id ? { ...task, done: !task.done } : task,
+      ),
+    )
+  }
+
+  const deleteTask = (id) => {
+    Swal.fire({
+      title: "Sir,This your future.",
+      text: "Did you accomplish it in a way that satisfies you?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTasks((currentTasks) => currentTasks.filter((task) => task.id !== id))
+        Swal.fire({
+
+          title: "Deleted!",
+          text: "The world is full of beautiful things, so enjoy them.",
+          icon: "success",
+          timer: 1200
+        });
+      }
+    });
+
+
+
+  }
+
+  const clearCompleted = () => {
+
+
+    Swal.fire({
+      title: "Sir,This your future.",
+      text: "Did you accomplish it in a way that satisfies you?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!"
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setTasks((currentTasks) => currentTasks.filter((task) => !task.done))
+        Swal.fire({
+
+          title: "Deleted!",
+          text: "The world is full of beautiful things, so enjoy them.",
+          icon: "success",
+          timer: 1200
+        });
+      }
+    });
+
+
+  }
+
+  useEffect(() => {
+    try {
+      // localStorage accepts only strings, so arrays and objects must be serialized.
+      localStorage.setItem('s', JSON.stringify(tasks))
+      localStorage.setItem('n', newTask)
+      localStorage.setItem('f', filter)
+    } catch (error) {
+      console.warn('localStorage is unavailable or full; the app will still work without persisting.', error)
+    }
+  }, [tasks, newTask, filter])
+
+  const renderPlanet = (planetIndex) => (
+    <div className="planet-frame" key={planetIndex}>
+      <div className="planet-loader">
+        {Array.from({ length: 9 }, (_, index) => (
+          <div
+            key={index}
+            className={`sphere sphere${index + 1}`}
+            style={{ '--rot': index, '--rotY': index + 1 }}
+          />
+        ))}
+      </div>
+    </div>
+  )
+
+  return (
+    <div className="todo-shell relative">
+      <div className="todo-bg-blur one" />
+      <div className="todo-bg-blur two" />
+
+      <main className="todo-app">
+        <header className="app-header">
+            <p className="eyebrow w-full">It's never to late.. to start. </p>
+          <div className=' flex flex-row justify-between items-center w-full'>
+            <h1>{open ? 
+              <div className=' flex flex-row gap-2 items-center'>
+            Plans
+            </div> : 'Tasks '}</h1>
+          <button
+            type="button"
+            onClick={() => setOpen((current) => !current)}
+            className="status-pill hover:cursor-pointer bg-[#D4AF371F] text-[#f5d57a]
+             hover:bg-[#443303] hover:text-[#fac71e]
+             active:bg-[#443303] active:text-[#fac71e]
+
+             transition-all duration-300"
+            aria-expanded={open}
+          >
+            <span className="status-dot" />
+            <span>{open ? 'Tasks' : 'Plans'}</span>
+          </button>
+          </div>
+
+        </header>
+
+        {open ? (
+          <Sheet />
+        ) : (
+          <div className="tasks-page">
+            <section className="summary-grid" aria-label="Task summary">
+              <article className="summary-card accent">
+                <span>Total</span>
+                <strong>{tasks.length}</strong>
+              </article>
+              <article className="summary-card">
+                <span>Done</span>
+                <strong>{completedTasks}</strong>
+              </article>
+              <article className="summary-card">
+                <span>Remaining</span>
+                <strong>{remainingTasks}</strong>
+              </article>
+            </section>
+
+            <form className="task-form" onSubmit={addTask}>
+              <input
+                ref={ref}
+                type="text"
+                value={newTask}
+                onChange={(event) => setNewTask(event.target.value)}
+                placeholder="Add a new task..."
+                aria-label="Add new task"
+              />
+              <button type="submit" className="adding">
+                Add
+              </button>
+            </form>
+
+            <div className="toolbar">
+              <div className="filters" aria-label="Task filters">
+                {['all', 'active', 'completed'].map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    className={filter === option ? 'active' : ''}
+                    onClick={() => setFilter(option)}
+                  >
+                    {option}
+                  </button>
+                ))}
+              </div>
+
+              {completedTasks > 0 && (
+                <button type="button" className="clear-btn" onClick={clearCompleted}>
+                  Clear completed
+                </button>
+              )}
+            </div>
+
+            <ul className="task-list">
+              {filteredTasks.length > 0 ? (
+                filteredTasks.map((task) => (
+                  <li key={task.id} className={`task-item ${task.done ? 'done' : ''}`}>
+                    <button
+                      type="button"
+                      className={task.done ? 'check-btn-done' : 'check-btn'}
+                      onClick={() => toggleTask(task.id)}
+                      aria-label={task.done ? 'Mark task as incomplete' : 'Mark task as complete'}
+                    >
+                      {task.done ? '✓' : ''}
+                    </button>
+
+                    <span className="task-text">{task.text}</span>
+
+                    <button
+                      type="button"
+                      className="delete-btn"
+                      onClick={() => deleteTask(task.id)}
+                      aria-label={`Delete ${task.text}`}
+                    >
+                      <span className="delete-btn-x ">×</span>
+                    </button>
+                  </li>
+                ))
+              ) : (
+                <li className="empty-state ">
+                  <EmptyStatePlanet className='planet-loader-x' aria-label="Loading tasks">
+                    {renderPlanet(0)}
+                    <p>Enjoy The Journey.</p>
+                    {renderPlanet(1)}
+                  </EmptyStatePlanet >
+                </li>
+              )}
+            </ul>
+          </div>
+        )}
+      </main>
+    </div>
+  )
+}
+
+const EmptyStatePlanet = styled.div`
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  width: 100%;
+  padding: 14px 0;
+  overflow:  visible !important;
+
+  .planet-frame {
+    display: grid;
+    flex: 0 0 120px;
+    width: 120px;
+    height: 120px;
+    place-items: center;
+  }
+
+  .planet-loader {
+    position: relative;
+    width: 30px;
+    height: 30px;
+    scale:4;
+    transform-style: preserve-3d;
+    animation: rotatePlanet 8s linear infinite;
+  }
+
+  .sphere {
+    position: absolute;
+    inset: 0;
+    transform: rotate(calc(var(--rot) * 40deg));
+    transform-style: preserve-3d;
+  }
+
+  .sphere::before {
+    content: '';
+    position: absolute;
+    inset: 18%;
+    border-radius: 50%;
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(108, 189, 255, 0.4) 25%, rgba(59, 130, 246, 0.25) 45%, rgba(15, 23, 42, 0.8) 100%);
+    border: 1px solid rgba(255, 255, 255, 0.25);
+    box-shadow: 0 0 18px rgba(96, 165, 250, 0.4), inset 0 0 18px rgba(147, 197, 253, 0.3);
+    transform: rotateY(calc(var(--rotY) * 40deg));
+  }
+
+  .sphere:nth-child(odd)::before {
+    background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.9), rgba(244, 114, 182, 0.5) 24%, rgba(168, 85, 247, 0.3) 50%, rgba(15, 23, 42, 0.8) 100%);
+  }
+
+  p {
+    margin: 0;
+    color: #f5d57a;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    font-size: 0.7rem;
+    white-space: nowrap;
+    }
+    
+  @media (max-width: 650px) {
+       gap: 8px;
+    
+        .planet-frame {
+          flex-basis: 50px;
+          width: 50px;
+          height: 50px;
+          // transform: translateX(-32px);
+
+        }
+    
+        .planet-loader {
+          scale: 2.9;
+        }
+    
+    
+      }
+
+  @media (max-width: 420px) {
+    gap: 8px;
+
+    .planet-frame {
+      flex-basis: 50px;
+      width: 50px;
+      height: 50px;
+    }
+
+    .planet-loader {
+      scale: 2.0;
+    }
+
+
+  }
+
+  @keyframes rotatePlanet {
+    0% {
+      transform: rotateX(70deg) rotateY(0deg);
+    }
+    100% {
+      transform: rotateX(70deg) rotateY(360deg);
+    }
+  }
+`
+
+export default App
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
