@@ -164,10 +164,11 @@ export default function Sheet() {
                 <>
                     <div className="sheet-page-heading">
                         <div>
-                            <p className="sheet-eyebrow">Your personal space : </p>
+                            <p className="sheet-eyebrow"> Always remember.. </p>
                             <h2 className='text-[12px] sm:text-[15px] text-amber-200 flex flex-col justify-center'>
-                                <span>لَأَسْتَسْهِلَنَّ الصَّعْبَ أَوْ أُدْرِكَ الْمُنَى</span>
-                               <span>فَمَا انْقَادَتِ الْآمَالُ إِلَّا لِصَابِرِ</span>
+                                <span>Where there's a will, there's a way.</span>
+                                <span>Action speaks louder than words.</span>
+                              
                             </h2>
                         </div>
                         <span className="sheet-count">{plans.length} saved</span>
