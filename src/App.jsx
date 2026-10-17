@@ -93,7 +93,8 @@ function App() {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
+      theme: 'dark'
     }).then((result) => {
       if (result.isConfirmed) {
         setTasks((currentTasks) => currentTasks.filter((task) => task.id !== id))
@@ -102,7 +103,8 @@ function App() {
           title: "Deleted!",
           text: "The world is full of beautiful things, so enjoy them.",
           icon: "success",
-          timer: 1200
+          timer: 1200,
+          theme: 'dark'
         });
       }
     });
@@ -121,7 +123,8 @@ function App() {
       showCancelButton: true,
       confirmButtonColor: "#3085d6",
       cancelButtonColor: "#d33",
-      confirmButtonText: "Yes, delete it!"
+      confirmButtonText: "Yes, delete it!",
+      theme:'dark'
     }).then((result) => {
       if (result.isConfirmed) {
         setTasks((currentTasks) => currentTasks.filter((task) => !task.done))
@@ -130,7 +133,8 @@ function App() {
           title: "Deleted!",
           text: "The world is full of beautiful things, so enjoy them.",
           icon: "success",
-          timer: 1200
+          timer: 1200,
+          theme:'dark'
         });
       }
     });
@@ -170,25 +174,25 @@ function App() {
 
       <main className="todo-app">
         <header className="app-header">
-            <p className="eyebrow w-full">It's never to late.. to start. </p>
+          <p className="eyebrow w-full">It's never to late.. to start. </p>
           <div className=' flex flex-row justify-between items-center w-full'>
-            <h1>{open ? 
+            <h1>{open ?
               <div className=' flex flex-row gap-2 items-center'>
-            Plans
-            </div> : 'Tasks '}</h1>
-          <button
-            type="button"
-            onClick={() => setOpen((current) => !current)}
-            className="status-pill hover:cursor-pointer bg-[#D4AF371F] text-[#f5d57a]
+                Plans
+              </div> : 'Tasks '}</h1>
+            <button
+              type="button"
+              onClick={() => setOpen((current) => !current)}
+              className="status-pill hover:cursor-pointer bg-[#D4AF371F] text-[#f5d57a]
              hover:bg-[#443303] hover:text-[#fac71e]
              active:bg-[#443303] active:text-[#fac71e]
 
              transition-all duration-300"
-            aria-expanded={open}
-          >
-            <span className="status-dot" />
-            <span>{open ? 'Tasks' : 'Plans'}</span>
-          </button>
+              aria-expanded={open}
+            >
+              <span className="status-dot" />
+              <span>{open ? 'Tasks' : 'Plans'}</span>
+            </button>
           </div>
 
         </header>
